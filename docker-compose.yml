@@ -28,6 +28,7 @@ services:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     ports:
       - "5000:5000"
+      - "5044:5044"
       - "9600:9600"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
@@ -72,7 +73,7 @@ services:
     build:
       context: tweeter-streams/
     volumes:
-      - ./logs/tweeter-streams/:/var/log/tweeter-streams/
+      - ./tweeter-streams/logs/:/var/log/tweeter-streams/
 #      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
 #    ports:
 #      - "5601:5601"

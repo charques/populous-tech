@@ -3,9 +3,11 @@ package io.populoustech
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
+import scala.util.control.Exception.allCatch
 import com.twitter.hbc.core.endpoint.{StatusesFilterEndpoint, StreamingEndpoint}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
+import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
@@ -48,7 +50,12 @@ object TwitterStreamToFileJob {
     twitterSource.setCustomEndpointInitializer(new FilterEndpoint("#pp", "#vox"))
     val streamSource: DataStream[String] = env.addSource(twitterSource)
 
-    val tweets: DataStream[String] = streamSource
+
+    val tweets: DataStream[String] = streamSource.filter(new FilterFunction[String]() {
+      // filter integers
+      @throws[Exception]
+      override def filter(value: String): Boolean = (allCatch opt value.toDouble).isEmpty
+    })
     // selecting English tweets and splitting to (word, 1)
     //.flatMap(new SelectEnglishAndTokenizeFlatMap)
     // group by words and sum their occurrences
@@ -74,6 +81,7 @@ object TwitterStreamToFileJob {
     // execute program
     env.execute("TwitterStreamToFileJob execute")
   }
+
 
   private class FilterEndpoint(tags: String*) extends TwitterSource.EndpointInitializer with Serializable {
     override def createEndpoint: StreamingEndpoint = {

@@ -1,16 +1,3 @@
-#filebeat.prospectors:
-#  - input_type: log
-#    paths:
-#      - "/var/log/tweeter-streams/*/part-*"
-#    exclude_lines: [0-9]*
-
-#filebeat.prospectors:
-#
-#  - input_type: log
-#    enabled: true
-#    paths:
-#      - /var/log/tweeter-streams/*/part-*
-
 filebeat.inputs:
 
   - type: log
@@ -21,16 +8,12 @@ filebeat.inputs:
     fields:
       type: tweeter-streams
     fields_under_root: true
-    encoding: utf-8
-    exclude_files: [".gz"]
-    ignore_older: 3h
 
-setup:
-  kibana:
-    host: "kibana:5601"
+output.logstash:
+      hosts: ["logstash:5044"]
 
-output.elasticsearch:
-  # Array of hosts to connect to.
-  hosts: ["elasticsearch:9200"]
-  username: "elastic"
-  password: "changeme"
+#output.elasticsearch:
+#    # Array of hosts to connect to.
+#    hosts: ["elasticsearch:9200"]
+#    username: "elastic"
+#    password: "changeme"
