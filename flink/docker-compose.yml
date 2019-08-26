@@ -1,0 +1,63 @@
+version: '3.4'
+services:
+
+  jobmanager:
+    image: flink:1.7.2-scala_2.11
+    ports:
+      - "8081:8081"
+      - "6123:6123"
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    volumes:
+      - /tmp/flink-deployer:/data/flink
+
+  taskmanager:
+    image: flink:1.7.2-scala_2.11
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    volumes:
+      - /tmp/flink-deployer:/data/flink
+
+  deployer:
+    build: .
+    image: nielsdenissen/flink-deployer:master
+    depends_on:
+      - jobmanager
+      - taskmanager
+    # Deploy
+    command: 
+      - "deploy"
+      - "--file-name"
+      - "/tmp/flink-stateful-wordcount-assembly-0.jar"
+      - "--entry-class"
+      - "WordCountStateful"
+      - "--parallelism"
+      - "2"
+      - "--program-args"
+      - "--intervalMs 1000"
+    # Update
+    # command: 
+    #   - "update"
+    #   - "--job-name-base"
+    #   - "Windowed WordCount"
+    #   - "--file-name"
+    #   - "/tmp/flink-stateful-wordcount-assembly-0.jar"
+    #   - "--entry-class"
+    #   - "WordCountStateful"
+    #   - "--parallelism"
+    #   - "2"
+    #   - "--program-args"
+    #   - "--intervalMs 1000"
+    #   - "--savepoint-dir"
+    #   - "/data/flink"
+    volumes:
+      - /tmp/flink-deployer:/data/flink
+      - ./flink-sample-job/target/scala-2.11/:/tmp
+    environment:
+      - FLINK_BASE_URL=http://jobmanager:8081
+    links: 
+      - jobmanager

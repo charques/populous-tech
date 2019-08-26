@@ -1,0 +1,7 @@
+# Exclude everything
+**
+
+# Whitelist
+!cmd
+!vendor
+!flink-sample-job/target/
