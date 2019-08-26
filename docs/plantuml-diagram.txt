@@ -1,0 +1,39 @@
+@startuml
+title Populous Tech
+
+[*] --> FlinkDeployer
+
+state FlinkDeployer #linen
+
+state "Flink Cluster" as Flink #lavender {
+  state JobManager #lavender
+  state TaskManager #lavender
+
+  JobManager --> TaskManager
+  TaskManager --> JobManager
+}
+
+state "Tweeter-Streams" as TStreams #pink {
+  state TwitterStreamToFileJob #pink
+  state FileSystem #plum
+  TwitterStreamToFileJob --> FileSystem : 4. Job Output
+}
+
+state "Elk" as Elk #peachpuff {
+  state Filebeat #peachpuff
+  state Logstash #peachpuff
+  state Elasticsearch #peachpuff
+  state Kibana #peachpuff
+  Filebeat --> Logstash : 6. Ship
+  Logstash --> Elasticsearch : 7. Parse and Transform
+  Kibana --> Elasticsearch : 8. Visualize
+}
+
+state "Tweeter" as Tweeter #lightblue
+
+FlinkDeployer --> JobManager : 2. Deploy Job
+FlinkDeployer -Right-> TwitterStreamToFileJob : 1. Get Assembly
+TwitterStreamToFileJob -Down-> Tweeter : 3. Tweeter Streaming
+Filebeat -Down-> FileSystem : 5. Harvest
+
+@enduml
