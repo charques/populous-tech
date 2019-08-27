@@ -2,6 +2,75 @@ version: '2'
 
 services:
 
+  elasticsearch:
+    build:
+      context: elk/elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+    networks:
+      - populous
+
+  logstash:
+    build:
+      context: elk/logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - populous
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: elk/kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - populous
+    depends_on:
+      - elasticsearch
+
+  tweeter-streams:
+    build:
+      context: tweeter-streams/
+    volumes:
+      - ./tweeter-streams/logs/:/var/log/tweeter-streams/
+    networks:
+      - populous
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    build: elk/filebeat/
+    volumes:
+      - ./tweeter-streams/logs/:/var/log/tweeter-streams/
+    networks:
+      - populous
+    command: filebeat -e -strict.perms=false
+    depends_on:
+      - elasticsearch
+
   flink-jobmanager:
     image: flink:1.7.2-scala_2.11
     ports:
@@ -12,6 +81,8 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     volumes:
       - ./tmp/flink:/data/flink
+    networks:
+      - populous
 
   flink-taskmanager:
     image: flink:1.7.2-scala_2.11
@@ -22,6 +93,8 @@ services:
       - ./tmp/flink:/data/flink
     depends_on:
       - flink-jobmanager
+    networks:
+      - populous
 
   flink-deployer:
     build:
@@ -63,6 +136,8 @@ services:
       - FLINK_BASE_URL=http://flink-jobmanager:8081
     links:
       - flink-jobmanager
+    networks:
+      - populous
 
 networks:
 
