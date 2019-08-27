@@ -9,6 +9,7 @@ services:
         ELK_VERSION: $ELK_VERSION
     volumes:
       - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -55,7 +56,7 @@ services:
     build:
       context: tweeter-streams/
     volumes:
-      - ./tweeter-streams/logs/:/var/log/tweeter-streams/
+      - ./data/tweeter-streams/:/var/log/tweeter-streams/
     networks:
       - populous
     depends_on:
@@ -64,7 +65,7 @@ services:
   filebeat:
     build: elk/filebeat/
     volumes:
-      - ./tweeter-streams/logs/:/var/log/tweeter-streams/
+      - ./data/tweeter-streams/:/var/log/tweeter-streams/
     networks:
       - populous
     command: filebeat -e -strict.perms=false
@@ -80,7 +81,7 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     volumes:
-      - ./tmp/flink:/data/flink
+      - ./data/flink:/data/flink
     networks:
       - populous
 
@@ -90,7 +91,7 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     volumes:
-      - ./tmp/flink:/data/flink
+      - ./data/flink:/data/flink
     depends_on:
       - flink-jobmanager
     networks:
@@ -130,7 +131,7 @@ services:
     #   - "--savepoint-dir"
     #   - "/data/flink"
     volumes:
-      - ./tmp/flink:/data/flink
+      - ./data/flink:/data/flink
       - ./flink-deployer/flink-sample-job/target/scala-2.11/:/tmp
     environment:
       - FLINK_BASE_URL=http://flink-jobmanager:8081

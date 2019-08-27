@@ -1,5 +1,8 @@
 .idea
 
+data/elasticsearch/
+data/flink/
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Scala template
 *.class
