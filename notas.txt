@@ -1,6 +1,7 @@
-- merge docker compose
+crear flink docker files parametrizados
+
+
 - contruccion del deployer - dentro del compose?
 - integrar tweeter-streams
+- upgrade version de scala en flink
 - definir pasos instalación para readme
-
-- persistencia elastic search

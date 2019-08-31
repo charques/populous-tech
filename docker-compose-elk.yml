@@ -1,0 +1,58 @@
+version: '2'
+
+services:
+
+  elasticsearch:
+    build:
+      context: elk/elasticsearch
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+    networks:
+      - populous
+
+  logstash:
+    build:
+      context: elk/logstash
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - populous
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: elk/kibana
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - populous
+    depends_on:
+      - elasticsearch
+
+networks:
+
+  populous:
+    driver: bridge

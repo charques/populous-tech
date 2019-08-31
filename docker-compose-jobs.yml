@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+
+  tweeter-streams:
+    build:
+      context: jobs/tweeter-streams
+    environment:
+      - FLINK_MASTER_PORT_8081_TCP_ADDR=flink-jobmanager
+      - FLINK_MASTER_PORT_8081_TCP_PORT=8081
+    networks:
+      - populous
+
+  filebeat:
+    build: jobs/tweeter-streams-filebeat
+    volumes:
+      - ./data/tweeter-streams/:/var/log/tweeter-streams/
+    networks:
+      - populous
+    command: filebeat -e -strict.perms=false
+
+networks:
+
+  populous:
+    driver: bridge

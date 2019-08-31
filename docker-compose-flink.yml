@@ -1,0 +1,77 @@
+version: '2'
+
+services:
+
+  flink-jobmanager:
+    build:
+      context: flink/flink
+    ports:
+      - "8081:8081"
+      - "6123:6123"
+    command: jobmanager
+    volumes:
+      - ./data/flink:/data/flink
+    networks:
+      - populous
+
+  flink-taskmanager:
+    build:
+      context: flink/flink
+    volumes:
+      - ./data/flink:/data/flink
+      - ./data/:/var/log/
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+    networks:
+      - populous
+
+#  flink-deployer:
+#    build:
+#      context: flink-deployer/
+#    image: nielsdenissen/flink-deployer:master
+#    depends_on:
+#      - flink-jobmanager
+#      - flink-taskmanager
+#      - tweeter-streams
+#    # Deploy
+#    command:
+#      - "deploy"
+#      - "--file-name"
+#      #- "/tmp/tweeter-streams-assembly-0.1-SNAPSHOT.jar"
+#      - "/tmp/tweeter-streams-assembly-0.1-SNAPSHOT.jar"
+#      - "--entry-class"
+#      - "TweeterStreamToFileJob"
+#      - "--parallelism"
+#      - "2"
+#      - "--program-args"
+#      - "--intervalMs 1000"
+#    # Update
+#    # command:
+#    #   - "update"
+#    #   - "--job-name-base"
+#    #   - "Tweeter Streams"
+#    #   - "--file-name"
+#    #   - "/tmp/tweeter-streams-assembly-0.1-SNAPSHOT.jar"
+#    #   - "--entry-class"
+#    #   - "TweeterStreamToFileJob"
+#    #   - "--parallelism"
+#    #   - "2"
+#    #   - "--program-args"
+#    #   - "--intervalMs 1000"
+#    #   - "--savepoint-dir"
+#    #   - "/data/flink"
+#    volumes:
+#      - ./data/flink:/data/flink
+#      - ./tmp/tweeter-streams/scala-2.11/:/tmp
+#    environment:
+#      - FLINK_BASE_URL=http://flink-jobmanager:8081
+#    links:
+#      - flink-jobmanager
+#    networks:
+#      - populous
+
+networks:
+
+  populous:
+    driver: bridge

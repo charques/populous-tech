@@ -134,4 +134,4 @@ Carlos Hernández - [@charques](https://twitter.com/charques) - carloshernandeza
 
 Project Link: [https://github.com/charques/populous-tech/](https://github.com/charques/populous-tech/)
 
-[product-screenshot]: images/populous-tech_v1.png
+[product-screenshot]: docs/images/populous-tech_v1.png

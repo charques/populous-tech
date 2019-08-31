@@ -1,17 +1,8 @@
-.idea
-
-data/elasticsearch/
-data/flink/
-
-# Created by .ignore support plugin (hsz.mobi)
-### Scala template
+### Scala
 *.class
 *.log
 
-### SBT template
-# Simple Build Tool
-# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
-
+### SBT
 dist/*
 target/
 lib_managed/
@@ -21,4 +12,10 @@ project/plugins/project/
 .history
 .cache
 .lib/
+
+### OTHERS
+.idea
+tmp/
+data/elasticsearch/
+data/flink/
 
