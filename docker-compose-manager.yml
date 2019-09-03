@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+
+  manager-apis:
+    build:
+      context: manager/manager-api
+    ports:
+      - "8666:8666"
+    networks:
+      - populous
+
+networks:
+
+  populous:
+    driver: bridge

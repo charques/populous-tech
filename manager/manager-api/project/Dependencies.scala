@@ -4,6 +4,7 @@ object Version {
   final val Scala       = "2.12.6"
   final val ScalaTest   = "3.0.1"
   final val Vertx       = "3.5.3"
+  final val Jackson     = "2.9.9"
 }
 
 object Library {
@@ -56,6 +57,7 @@ object Library {
   val vertx_config_yaml                 = "io.vertx" %% "vertx-config-yaml-scala"                 % Version.Vertx
   val vertx_config_zookeeper            = "io.vertx" %% "vertx-config-zookeeper-scala"            % Version.Vertx
 
+  val jackson_module_scala              = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Version.Jackson
   //non-vert.x deps
   val scalaTest                         = "org.scalatest" %% "scalatest" % Version.ScalaTest
 }

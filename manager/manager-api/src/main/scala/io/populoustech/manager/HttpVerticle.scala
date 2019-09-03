@@ -1,23 +1,26 @@
 package io.populoustech.manager
 
-import io.vertx.lang.scala.ScalaVerticle
-import io.vertx.scala.ext.web.Router
+import io.populoustech.manager.routing.impl.PopulousManagerRouter
+import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 
 import scala.concurrent.Future
 
 class HttpVerticle extends ScalaVerticle {
 
+  private val log = ScalaLogger.getLogger(classOf[HttpVerticle].getName)
 
   override def startFuture(): Future[_] = {
-    //Create a router to answer GET-requests to "/hello" with "world"
-    val router = Router.router(vertx)
-    val route = router
-      .get("/hello")
-      .handler(_.response().end("world"))
+    log.info("HttpVerticle startFuture()")
 
     vertx
       .createHttpServer()
-      .requestHandler(router.accept _)
-      .listenFuture(8666, "0.0.0.0")
+      .requestHandler(PopulousManagerRouter(vertx, executionContext))
+      .listenFuture(PopulousManagerServer.PORT, PopulousManagerServer.HOST)
   }
+
+}
+
+object PopulousManagerServer {
+  val PORT = 8666
+  val HOST = "localhost"
 }
