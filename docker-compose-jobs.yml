@@ -8,6 +8,8 @@ services:
     environment:
       - FLINK_MASTER_PORT_8081_TCP_ADDR=flink-jobmanager
       - FLINK_MASTER_PORT_8081_TCP_PORT=8081
+    volumes:
+      - ./shared/tweeter-streams/:/shared/
     networks:
       - populous
 

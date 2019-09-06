@@ -1,8 +1,7 @@
-package io.populoustech.manager.routing.impl
+package io.populoustech.manager.routing
 
-import io.populoustech.manager.domain.Job
-import io.populoustech.manager.routing.{JacksonRoutes, Routes}
-import io.populoustech.manager.services.JobsServiceImpl
+import io.populoustech.manager.domain.CreateJobRequest
+import io.populoustech.manager.services.FlinkJobsServiceImpl
 import io.vertx.core.Handler
 import io.vertx.lang.scala.{ScalaLogger, VertxExecutionContext}
 import io.vertx.scala.core.Vertx
@@ -11,11 +10,11 @@ import io.vertx.scala.core.http.HttpServerRequest
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-sealed class PopulousManagerRouter (override val vertx: Vertx, implicit val context: VertxExecutionContext) extends JacksonRoutes(vertx = vertx) {
+sealed class ManagerRoutes(override val vertx: Vertx, implicit val context: VertxExecutionContext) extends Routes(vertx = vertx) {
 
-  private val log = ScalaLogger.getLogger(classOf[PopulousManagerRouter].getName)
+  private val log = ScalaLogger.getLogger(classOf[ManagerRoutes].getName)
 
-  lazy val jobsService = JobsServiceImpl(vertx, context)
+  lazy val jobsService = FlinkJobsServiceImpl(vertx, context)
 
   override def attachRoutes(): Routes = {
     super.attachRoutes()
@@ -44,14 +43,14 @@ sealed class PopulousManagerRouter (override val vertx: Vertx, implicit val cont
       })
 
     router.post("/jobs").handler((rc: io.vertx.scala.ext.web.RoutingContext) => {
-      getBody(rc, classOf[Job]) match {
+      getBody(rc, classOf[CreateJobRequest]) match {
         case None => rc.fail(400)
         case Some(job) => {
-          jobsService.create(job).onComplete {
+          jobsService.create(job.tag.get).onComplete {
             case Success(result) => {
               log.info("JobService create OK")
               rc.response().setStatusCode(202)
-              rc.response().end(result.toString)
+              rc.response().end(result.bodyAsString().get)
             }
             case Failure(cause) => {
               log.info("JobService create KO ", cause.getMessage)
@@ -67,10 +66,10 @@ sealed class PopulousManagerRouter (override val vertx: Vertx, implicit val cont
   }
 }
 
-object PopulousManagerRouter {
+object ManagerRoutes {
 
   def apply(vertx: Vertx, context: VertxExecutionContext): Handler[HttpServerRequest] = {
-    new PopulousManagerRouter(vertx, context).apply()
+    new ManagerRoutes(vertx, context).apply()
   }
 
 }

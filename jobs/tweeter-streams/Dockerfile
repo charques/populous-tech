@@ -17,7 +17,7 @@
 
 FROM flink:1.9.0-scala_2.12
 
-ENV FLINK_APPLICATION_JAR_DESTINATION /app/application.jar
+ENV FLINK_APPLICATION_JAR_DESTINATION /shared/application.jar
 ENV FLINK_APPLICATION_JAR_ORIGIN target/scala-2.11/tweeter-streams-assembly-0.1-SNAPSHOT.jar
 ENV FLINK_APPLICATION_MAIN_CLASS io.populoustech.TweeterStreamToFileJob
 ENV FLINK_APPLICATION_ARGS ""

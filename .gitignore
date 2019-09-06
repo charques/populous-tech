@@ -18,4 +18,6 @@ project/plugins/project/
 tmp/
 data/elasticsearch/
 data/flink/
+shared/
+app/
 

@@ -1,6 +1,6 @@
 package io.populoustech.manager
 
-import io.populoustech.manager.routing.impl.PopulousManagerRouter
+import io.populoustech.manager.routing.ManagerRoutes
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 
 import scala.concurrent.Future
@@ -14,7 +14,7 @@ class HttpVerticle extends ScalaVerticle {
 
     vertx
       .createHttpServer()
-      .requestHandler(PopulousManagerRouter(vertx, executionContext))
+      .requestHandler(ManagerRoutes(vertx, executionContext))
       .listenFuture(PopulousManagerServer.PORT, PopulousManagerServer.HOST)
   }
 

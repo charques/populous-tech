@@ -3,7 +3,7 @@ import sbt._
 object Version {
   final val Scala       = "2.12.6"
   final val ScalaTest   = "3.0.1"
-  final val Vertx       = "3.5.3"
+  final val Vertx       = "3.8.0"
   final val Jackson     = "2.9.9"
 }
 
