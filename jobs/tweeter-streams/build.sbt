@@ -13,11 +13,11 @@ name := "tweeter-streams"
 version := "0.1-SNAPSHOT"
 organization := "io.populoustech"
 
-ThisBuild / scalaVersion := "2.11.12"
+ThisBuild / scalaVersion := "2.12.6"
 
 lazy val root = (project in file(".")).
   settings(
-    libraryDependencies ++= /*slf4j ++ logback ++ junit ++ junitInterface ++*/ flinkDependencies
+    libraryDependencies ++= logs ++ flinkDependencies
   )
 
 assembly / mainClass := Some("io.populoustech.TweeterStreamToFileJob")

@@ -18,12 +18,12 @@
 FROM flink:1.9.0-scala_2.12
 
 ENV FLINK_APPLICATION_JAR_DESTINATION /shared/application.jar
-ENV FLINK_APPLICATION_JAR_ORIGIN target/scala-2.11/tweeter-streams-assembly-0.1-SNAPSHOT.jar
+ENV FLINK_APPLICATION_JAR_ORIGIN target/scala-2.12/tweeter-streams-assembly-0.1-SNAPSHOT.jar
 ENV FLINK_APPLICATION_MAIN_CLASS io.populoustech.TweeterStreamToFileJob
 ENV FLINK_APPLICATION_ARGS ""
 
 # SBT & Scala
-ENV SCALA_VERSION=2.11.12
+ENV SCALA_VERSION=2.12.6
 ENV SBT_VERSION=1.2.8
 
 COPY submit.sh /
@@ -49,7 +49,6 @@ RUN apt-get update \
 
 COPY . /usr/src/app
 RUN cd /usr/src/app \
-#        && sbt clean package
          && sbt clean assembly
 
 CMD ["/bin/bash", "/submit.sh"]

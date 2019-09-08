@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-class FlinkGetJobsHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
+class FlinkGetJobsHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends BaseHandler(vertx = vertx) {
 
   private val log: Logger = Logger(LoggerFactory.getLogger(classOf[FlinkGetJobsHandler].getName))
 

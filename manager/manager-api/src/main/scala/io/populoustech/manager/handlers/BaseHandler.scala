@@ -7,7 +7,7 @@ import io.vertx.core.Handler
 import io.vertx.scala.core.Vertx
 import io.vertx.scala.ext.web.RoutingContext
 
-abstract class CircuitBreakerHandler(val vertx: Vertx) extends Handler[RoutingContext] {
+abstract class BaseHandler(val vertx: Vertx) extends Handler[RoutingContext] {
 
   private val mapper = new ObjectMapper() with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)

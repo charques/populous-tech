@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
+class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends BaseHandler(vertx = vertx) {
 
   private val log: Logger = Logger(LoggerFactory.getLogger(classOf[FlinkCreateJobHandler].getName))
 
