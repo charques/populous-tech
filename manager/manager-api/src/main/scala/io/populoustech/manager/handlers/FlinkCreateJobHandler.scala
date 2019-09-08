@@ -1,9 +1,11 @@
 package io.populoustech.manager.handlers
 
 import com.typesafe.scalalogging.Logger
+import io.populoustech.manager.ConfigurationKeys
 import io.populoustech.manager.domain.{CreateJobRequest, FlinkJarsUploadResponse, FlinkRunJarRequest}
 import io.vertx.core.buffer.Buffer
 import io.vertx.lang.scala.VertxExecutionContext
+import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.circuitbreaker.{CircuitBreaker, CircuitBreakerOptions}
 import io.vertx.scala.core.{Promise, Vertx}
 import io.vertx.scala.ext.web.RoutingContext
@@ -15,9 +17,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class FlinkCreateJobHandler(override val vertx: Vertx, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
+class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
 
   private val log: Logger = Logger(LoggerFactory.getLogger(classOf[FlinkCreateJobHandler].getName))
+
+  private val FLINK_PORT: Integer = config.getInteger(ConfigurationKeys.FLINK_PORT)
+  private val FLINK_HOST: String = config.getString(ConfigurationKeys.FLINK_HOST)
+
+  private val JAR_FILE_NAME: String = config.getString(ConfigurationKeys.JAR_FILE_NAME)
+  private val JAR_PATH: String = config.getString(ConfigurationKeys.JAR_PATH)
+  private val JAR_MEDIA_TYPE: String = config.getString(ConfigurationKeys.JAR_MEDIA_TYPE)
+  private val JOB_ENTRY_CLASS: String = config.getString(ConfigurationKeys.JOB_ENTRY_CLASS)
 
   private val circuitBreakerOptions: CircuitBreakerOptions = CircuitBreakerOptions()
     .setMaxFailures(3)
@@ -65,10 +75,10 @@ class FlinkCreateJobHandler(override val vertx: Vertx, implicit val context: Ver
 
   private def uploadJar(jobTag: String): Future[String] = {
     val form = MultipartForm.create()
-      .binaryFileUpload("jarfile", FlinkConfigValues.JAR_FILE_NAME, FlinkConfigValues.JAR_PATH, FlinkConfigValues.JAR_MEDIA_TYPE)
+      .binaryFileUpload("jarfile", JAR_FILE_NAME, JAR_PATH, JAR_MEDIA_TYPE)
 
     WebClient.create(vertx)
-      .post(FlinkConfigValues.FLINK_PORT, FlinkConfigValues.FLINK_HOST, "/jars/upload").sendMultipartFormFuture(form)
+      .post(FLINK_PORT, FLINK_HOST, "/jars/upload").sendMultipartFormFuture(form)
       .flatMap(response => {
         Future {
           log.info("uploadJar: " + response.body().toString)
@@ -87,11 +97,11 @@ class FlinkCreateJobHandler(override val vertx: Vertx, implicit val context: Ver
   }
 
   private def runJob(jarId: String): Future[HttpResponse[Buffer]] = {
-    val flinkRunJarRequest = FlinkRunJarRequest(FlinkConfigValues.JOB_ENTRY_CLASS)
+    val flinkRunJarRequest = FlinkRunJarRequest(JOB_ENTRY_CLASS)
 
     log.info("runJob: " +  jarId + " : " + flinkRunJarRequest.entryClass)
     WebClient.create(vertx)
-      .post(FlinkConfigValues.FLINK_PORT, FlinkConfigValues.FLINK_HOST, "/jars/" + jarId + "/run")
+      .post(FLINK_PORT, FLINK_HOST, "/jars/" + jarId + "/run")
       .putHeader("content-type", "application/json")
       .sendJsonFuture(flinkRunJarRequest)
   }
@@ -100,11 +110,11 @@ class FlinkCreateJobHandler(override val vertx: Vertx, implicit val context: Ver
 
 object FlinkCreateJobHandler {
 
-  def apply(vertx: Vertx, context: VertxExecutionContext) = new FlinkCreateJobHandler(vertx, context)
+  def apply(vertx: Vertx, config: JsonObject, context: VertxExecutionContext) = new FlinkCreateJobHandler(vertx, config, context)
 
 }
 
-object FlinkConfigValues {
+/*object FlinkConfigValues {
   val FLINK_HOST = "localhost"
   val FLINK_PORT = 8081
 
@@ -112,4 +122,4 @@ object FlinkConfigValues {
   val JAR_PATH = "/Users/charques/Dev/populous-tech/shared/tweeter-streams/application.jar"
   val JAR_MEDIA_TYPE = "application/x-java-archive"
   val JOB_ENTRY_CLASS = "io.populoustech.TweeterStreamToFileJob"
-}
+}*/

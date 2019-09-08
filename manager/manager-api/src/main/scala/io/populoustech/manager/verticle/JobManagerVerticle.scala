@@ -62,8 +62,8 @@ class JobManagerVerticle extends ScalaVerticle {
     router.route.last.handler(sendPayloadAsJson)
 
     val failureHandler = new FailureHandler
-    val flinkGetJobsHandler = FlinkGetJobsHandler(vertx, executionContext)
-    val flinkCreateJobHandler = FlinkCreateJobHandler(vertx, executionContext)
+    val flinkGetJobsHandler = FlinkGetJobsHandler(vertx, config, executionContext)
+    val flinkCreateJobHandler = FlinkCreateJobHandler(vertx, config, executionContext)
 
     router
       .get("/hello")

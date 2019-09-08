@@ -1,7 +1,9 @@
 package io.populoustech.manager.handlers
 
 import com.typesafe.scalalogging.Logger
+import io.populoustech.manager.ConfigurationKeys
 import io.vertx.lang.scala.VertxExecutionContext
+import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.circuitbreaker.{CircuitBreaker, CircuitBreakerOptions}
 import io.vertx.scala.core.{Promise, Vertx}
 import io.vertx.scala.ext.web.RoutingContext
@@ -11,9 +13,12 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-class FlinkGetJobsHandler(override val vertx: Vertx, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
+class FlinkGetJobsHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends CircuitBreakerHandler(vertx = vertx) {
 
   private val log: Logger = Logger(LoggerFactory.getLogger(classOf[FlinkGetJobsHandler].getName))
+
+  private val FLINK_PORT: Integer = config.getInteger(ConfigurationKeys.FLINK_PORT)
+  private val FLINK_HOST: String = config.getString(ConfigurationKeys.FLINK_HOST)
 
   private val circuitBreakerOptions: CircuitBreakerOptions = CircuitBreakerOptions()
     .setMaxFailures(3)
@@ -30,7 +35,7 @@ class FlinkGetJobsHandler(override val vertx: Vertx, implicit val context: Vertx
 
     def command(future: Promise[String]): Promise[String] = {
       WebClient.create(vertx)
-        .get(FlinkConfigValues.FLINK_PORT, FlinkConfigValues.FLINK_HOST, "/jobs/overview")
+        .get(FLINK_PORT, FLINK_HOST, "/jobs/overview")
         .sendFuture().onComplete {
           case Success(httpResponse) => future.complete(httpResponse.bodyAsString().get)
           case Failure(cause) => future.fail(cause.getMessage)
@@ -58,6 +63,6 @@ class FlinkGetJobsHandler(override val vertx: Vertx, implicit val context: Vertx
 
 object FlinkGetJobsHandler {
 
-  def apply(vertx: Vertx, context: VertxExecutionContext) = new FlinkGetJobsHandler(vertx, context)
+  def apply(vertx: Vertx, config: JsonObject, context: VertxExecutionContext) = new FlinkGetJobsHandler(vertx, config, context)
 
 }
