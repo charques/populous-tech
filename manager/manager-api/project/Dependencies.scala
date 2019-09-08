@@ -5,6 +5,7 @@ object Version {
   final val ScalaTest   = "3.0.1"
   final val Vertx       = "3.8.0"
   final val Jackson     = "2.9.9"
+  final val Logback     = "1.2.3"
 }
 
 object Library {
@@ -13,6 +14,7 @@ object Library {
   val vertx_hazelcast                   = "io.vertx" %  "vertx-hazelcast"                         % Version.Vertx
   val vertx_web                         = "io.vertx" %% "vertx-web-scala"                         % Version.Vertx
 
+  val vertx_health_check                = "io.vertx" % "vertx-health-check"                       % Version.Vertx
   val vertx_mqtt                        = "io.vertx" %% "vertx-mqtt-scala"                        % Version.Vertx
   val vertx_sql_common                  = "io.vertx" %% "vertx-sql-common-scala"                  % Version.Vertx
   val vertx_bridge_common               = "io.vertx" %% "vertx-bridge-common-scala"               % Version.Vertx
@@ -58,6 +60,8 @@ object Library {
   val vertx_config_zookeeper            = "io.vertx" %% "vertx-config-zookeeper-scala"            % Version.Vertx
 
   val jackson_module_scala              = "com.fasterxml.jackson.module" %% "jackson-module-scala" % Version.Jackson
+  val logback_classic                   = "ch.qos.logback" % "logback-classic"                    % Version.Logback
+  val scala_logging                     = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
   //non-vert.x deps
   val scalaTest                         = "org.scalatest" %% "scalatest" % Version.ScalaTest
 }

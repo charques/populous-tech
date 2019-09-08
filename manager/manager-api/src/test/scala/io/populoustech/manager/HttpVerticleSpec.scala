@@ -1,10 +1,11 @@
 package io.populoustech.manager
 
+import io.populoustech.manager.verticle.JobManagerVerticle
 import org.scalatest.Matchers
 
 import scala.concurrent.Promise
 
-class HttpVerticleSpec extends VerticleTesting[HttpVerticle] with Matchers {
+class HttpVerticleSpec extends VerticleTesting[JobManagerVerticle] with Matchers {
 
   "HttpVerticle" should "bind to 8666 and answer with 'world'" in {
     val promise = Promise[String]
