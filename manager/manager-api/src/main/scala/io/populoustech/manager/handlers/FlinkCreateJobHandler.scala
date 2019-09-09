@@ -46,8 +46,9 @@ class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, impli
       getBody(event, classOf[CreateJobRequest]) match {
         case None => future.fail("HTTP error")
         case Some(job) => {
-          uploadJar(job.tag.get)
-            .flatMap(runJob).onComplete {
+          val partialRunJob = runJob(job.tag.get) _
+          uploadJar()
+            .flatMap(partialRunJob).onComplete {
               case Success(httpResponse) => future.complete(httpResponse.bodyAsString().get)
               case Failure(cause) => future.fail(cause.getMessage)
           }
@@ -73,7 +74,7 @@ class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, impli
     }
   }
 
-  private def uploadJar(jobTag: String): Future[String] = {
+  private def uploadJar(): Future[String] = {
     val form = MultipartForm.create()
       .binaryFileUpload("jarfile", JAR_FILE_NAME, JAR_PATH, JAR_MEDIA_TYPE)
 
@@ -96,10 +97,11 @@ class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, impli
       })
   }
 
-  private def runJob(jarId: String): Future[HttpResponse[Buffer]] = {
-    val flinkRunJarRequest = FlinkRunJarRequest(JOB_ENTRY_CLASS)
+  private def runJob(jobTag: String)(jarId: String): Future[HttpResponse[Buffer]] = {
+    val flinkRunJarRequest = new FlinkRunJarRequest(JOB_ENTRY_CLASS)
+    flinkRunJarRequest.addArg("tag", jobTag)
 
-    log.info("runJob: " +  jarId + " : " + flinkRunJarRequest.entryClass)
+    log.info("runJob: " +  jarId + " - entryClass: " + flinkRunJarRequest.entryClass + " - programArgs: " + flinkRunJarRequest.programArgs)
     WebClient.create(vertx)
       .post(FLINK_PORT, FLINK_HOST, "/jars/" + jarId + "/run")
       .putHeader("content-type", "application/json")
@@ -113,13 +115,3 @@ object FlinkCreateJobHandler {
   def apply(vertx: Vertx, config: JsonObject, context: VertxExecutionContext) = new FlinkCreateJobHandler(vertx, config, context)
 
 }
-
-/*object FlinkConfigValues {
-  val FLINK_HOST = "localhost"
-  val FLINK_PORT = 8081
-
-  val JAR_FILE_NAME = "application.jar"
-  val JAR_PATH = "/Users/charques/Dev/populous-tech/shared/tweeter-streams/application.jar"
-  val JAR_MEDIA_TYPE = "application/x-java-archive"
-  val JOB_ENTRY_CLASS = "io.populoustech.TweeterStreamToFileJob"
-}*/

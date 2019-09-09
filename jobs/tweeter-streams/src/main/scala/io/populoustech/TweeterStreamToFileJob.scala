@@ -3,12 +3,10 @@ package io.populoustech
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
-import scala.util.control.Exception.allCatch
 import com.twitter.hbc.core.endpoint.{StatusesFilterEndpoint, StreamingEndpoint}
-import com.typesafe.scalalogging.Logger
+import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
-import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
@@ -17,20 +15,21 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSin
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.connectors.twitter.TwitterSource
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters
+import scala.util.control.Exception.allCatch
 
 object TweeterStreamToFileJob {
 
   def main(args: Array[String]): Unit = {
 
-    val logger: Logger = Logger(LoggerFactory.getLogger(this.getClass))
+    val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
     val params = ParameterTool.fromArgs(args)
     val tweeterTag = params.get("tag", "#scala")
     val parallelism = params.getInt("parallelism", 1)
-    val checkpointing = params.getInt("checkpointing", 10000)
+    val checkpointing = params.getInt("checkpointing", 30000)
     val fileOutput = params.getBoolean("fileoutput", true)
     val outputFolder = params.get("outputfolder", "/var/log/tweeter-streams")
 
@@ -50,18 +49,15 @@ object TweeterStreamToFileJob {
     props.load(TweeterStreamToFileJob.getClass.getResourceAsStream("/twitter.properties"))
     val twitterSource = new TwitterSource(props)
     twitterSource.setCustomEndpointInitializer(new FilterEndpoint(tweeterTag))
-    val streamSource: DataStream[String] = env.addSource(twitterSource)
 
+    val streamSource: DataStream[String] = env.addSource(twitterSource)
+      .uid("tweeter-source")
 
     val tweets: DataStream[String] = streamSource.filter(new FilterFunction[String]() {
       // filter integers
       @throws[Exception]
       override def filter(value: String): Boolean = (allCatch opt value.toDouble).isEmpty
-    })
-    // selecting English tweets and splitting to (word, 1)
-    //.flatMap(new SelectEnglishAndTokenizeFlatMap)
-    // group by words and sum their occurrences
-    //.keyBy(0).sum(1)
+    }).uid("stream-int-cleaner")
 
     // emit result
     if (fileOutput) {
@@ -72,8 +68,8 @@ object TweeterStreamToFileJob {
         .withRollingPolicy(OnCheckpointRollingPolicy.build())
         .build()
 
-      tweets.addSink(sink)
-      tweets.print()
+      tweets.addSink(sink).uid("stream-file-sink")
+      //tweets.print().uid("stdout-sink")
 
     } else {
       logger.info("Printing result to stdout")
@@ -81,7 +77,7 @@ object TweeterStreamToFileJob {
     }
 
     // execute program
-    env.execute("TwitterStreamToFileJob execute")
+    env.execute("TweeterStreamToFileJob - " + tweeterTag)
   }
 
 
