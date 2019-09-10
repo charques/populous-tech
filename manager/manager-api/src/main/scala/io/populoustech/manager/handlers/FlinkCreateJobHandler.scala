@@ -99,13 +99,14 @@ class FlinkCreateJobHandler(override val vertx: Vertx, config: JsonObject, impli
 
   private def runJob(jobTag: String)(jarId: String): Future[HttpResponse[Buffer]] = {
     val flinkRunJarRequest = new FlinkRunJarRequest(JOB_ENTRY_CLASS)
-    flinkRunJarRequest.addArg("tag", jobTag)
+    flinkRunJarRequest.addArg("tag",  jobTag)
+    val body = getJsonStringFromObject(flinkRunJarRequest)
 
-    log.info("runJob: " +  jarId + " - entryClass: " + flinkRunJarRequest.entryClass + " - programArgs: " + flinkRunJarRequest.programArgs)
+    log.info("runJob: " +  jarId + " - body: " + body)
     WebClient.create(vertx)
       .post(FLINK_PORT, FLINK_HOST, "/jars/" + jarId + "/run")
       .putHeader("content-type", "application/json")
-      .sendJsonFuture(flinkRunJarRequest)
+      .sendBufferFuture(Buffer.buffer(body))
   }
 
 }

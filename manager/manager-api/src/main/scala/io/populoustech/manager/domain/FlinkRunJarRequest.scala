@@ -8,7 +8,7 @@ class FlinkRunJarRequest(val entryClass: String, var programArgs: String = "") {
   //var savepointPath: Option[String]*/
 
   def addArg(property: String, value: String): Unit = {
-    if (programArgs.length > 0) programArgs += ","
-    programArgs += property + "=#" + value
+    if (programArgs.length > 0) programArgs += " "
+    programArgs += "--" + property + " " + value
   }
 }
