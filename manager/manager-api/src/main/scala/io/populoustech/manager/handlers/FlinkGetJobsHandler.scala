@@ -10,7 +10,6 @@ import io.vertx.scala.ext.web.RoutingContext
 import io.vertx.scala.ext.web.client.WebClient
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 class FlinkGetJobsHandler(override val vertx: Vertx, config: JsonObject, implicit val context: VertxExecutionContext) extends BaseHandler(vertx = vertx) {
